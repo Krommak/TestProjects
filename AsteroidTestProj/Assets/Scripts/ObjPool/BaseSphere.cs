@@ -50,14 +50,10 @@ public class BaseSphere : MonoBehaviour
         obj.GetComponent<AudioSource>().enabled = false;
         Bullet bulletComponent = obj.GetComponent<Bullet>();
         Asteroid asteroidComponent = obj.GetComponent<Asteroid>();
-        if(bulletComponent)
-        {
-            Destroy(bulletComponent);    
-        }
-        else
-        {
-            Destroy(asteroidComponent);
-        }
+
+        Destroy(bulletComponent);
+        Destroy(asteroidComponent);
+
         obj.GetComponent<MeshRenderer>().material = gameMod.GetDefaultMaterial();
         obj.SetActive(false);
     }

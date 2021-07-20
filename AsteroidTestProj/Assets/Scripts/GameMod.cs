@@ -50,12 +50,36 @@ public class GameMod : MonoBehaviour
     protected ObjectPooling<ObjForPool> pool;
     protected UI uI;
 
+    private float delay;
+    [HideInInspector]
+    public float time;
+    [HideInInspector]
+    public bool UFOOnGame = false;
+
     void Awake()
     {
         uI = GameObject.Find("Canvas").GetComponent<UI>();
         pool = GameObject.Find("ObjectPool").GetComponent<ObjectPool>().GetPool();
 
         leftDownPoint = cam.ScreenToWorldPoint(Vector3.zero);
+    }
+
+    void Start()
+    {
+        SetNewDelay();
+    }
+
+    void Update()
+    {
+        if(!UFOOnGame && isStart)
+        {
+            time += Time.deltaTime;
+        }
+        if(time >= delay && !UFOOnGame)
+        {
+            UFOOnGame = true;
+            SpawnUFO();
+        }
     }
 
     #region Ограничение перемещения объектов и выстрел
@@ -160,8 +184,13 @@ public class GameMod : MonoBehaviour
 
     private IEnumerator RespawnDelay() //задержка генерации астероидов
     {
-        yield return new WaitForSecondsRealtime(0.1f);
-        if (pool.GetActiveElementsNum() == 0)
+        List<GameObject> objects = pool.GetActiveObjects();
+        bool activeAsteroids = false;        
+        foreach(GameObject obj in objects)
+        {
+            if(obj.tag == "Asteroid") activeAsteroids = true;
+        }
+        if (!activeAsteroids)
         {
             yield return new WaitForSecondsRealtime(asteroidsRespawnDelay);
             asteroidsOnStart++;
@@ -197,18 +226,15 @@ public class GameMod : MonoBehaviour
         return randomPos;
     }
 
-
-    public IEnumerator RespawnUFODelay() //Задержка появления НЛО
-    {
-        float delay = Random.Range(minUFODelay, maxUFODelay);
-        yield return new WaitForSecondsRealtime(delay);
-        SpawnUFO();
-    }
-
     public void SpawnUFO() //Генерация НЛО
     {
         Vector3 pos = GetUFOPos();
         GameObject res = Instantiate(UFO, pos, Quaternion.Euler(0f, 90f, 0f));
+    }
+
+    public void SetNewDelay()
+    {
+        delay = Random.Range(minUFODelay, maxUFODelay);
     }
     #endregion
 

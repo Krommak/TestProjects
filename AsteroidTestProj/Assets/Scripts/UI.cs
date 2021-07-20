@@ -48,7 +48,6 @@ public class UI : MonoBehaviour
         menuPanel.SetActive(false);
         gameMod.isStart = true;
         gameMod.SpawnAsteroids("big");
-        StartCoroutine(gameMod.RespawnUFODelay());
         StartCoroutine(player.GetComponent<PlayerController>().PlayerStart());
     }
 

@@ -16,25 +16,18 @@ public class Asteroid : BaseSphere
         gameMod.Teleport(this.gameObject);
     }
 
-    private IEnumerator ColliderEnable()
-    {
-        yield return new WaitForSecondsRealtime(0.2f);
-        this.gameObject.GetComponent<SphereCollider>().enabled = true;
-    }
 
     new private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == this.gameObject.tag)
-        {
-            Physics.IgnoreCollision(this.GetComponent<Collider>(), collision.gameObject.GetComponent<Collider>(), true);
-        }
-        else if (collision.gameObject.tag == "Player" || collision.gameObject.tag == "UFO")
+        if (collision.gameObject.tag == "Player" || collision.gameObject.tag == "UFO")
         {
             if (collision.gameObject.tag == "UFO")
             {
                 gameMod.Explosion(collision.gameObject.transform.position);
                 Destroy(collision.gameObject);
-                gameMod.RespawnUFODelay();
+                gameMod.time = 0;
+                gameMod.SetNewDelay();
+                gameMod.UFOOnGame = false;
             }
             if (collision.gameObject.tag == "Player")
             {
@@ -75,25 +68,21 @@ public class Asteroid : BaseSphere
             {
                 res = pool.GetFreeElement().gameObject;
                 res.tag = "Asteroid";
-                Asteroid newAsteroidComponent = res.AddComponent<Asteroid>();
-                newAsteroidComponent.enabled = true;
-                // Vector3 newPosition = new Vector3(i == 1 ? parent.transform.right.x - 0.25f : parent.transform.right.x + 0.25f,
-                //                                     parent.transform.position.y,
-                //                                     parent.transform.position.z);
-                Vector3 newScale = type == "big" ? gameMod.GetAsteroidScale("medium") : gameMod.GetAsteroidScale("small");
                 string newType = type == "big" ? "medium" : "small";
+                Vector3 newScale = type == "big" ? gameMod.GetAsteroidScale("medium") : gameMod.GetAsteroidScale("small");
                 res.tag = "Asteroid";
                 res.transform.rotation = parent.transform.rotation;
                 res.transform.Rotate(new Vector3(0.0f, i == 1 ? -45f : 45f, 0.0f), Space.Self);
-                newAsteroidComponent.SetAsteroidType(newType);
                 ActivateAsteroid(res, asteroidSpeed, newType);
+                Asteroid newAsteroidComponent = res.GetComponent<Asteroid>();
+                newAsteroidComponent.enabled = true;
+                newAsteroidComponent.SetAsteroidType(newType);
+
                 res.transform.localScale = newScale;
-                // res.transform.position = newPosition;
-                StartCoroutine(newAsteroidComponent.ColliderEnable());
                 res.transform.position = parent.transform.position;
             }
 
-            parent.GetComponent<Asteroid>().Deactivate(parent);
+            Deactivate(parent);
         }
     }
 }
